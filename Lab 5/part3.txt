@@ -1,0 +1,125 @@
+module part3(KEY0,SW,HEX0,HEX1,number);
+	input [9:0]SW;
+	input KEY0;
+	output [0:6]HEX0;
+	output [0:6]HEX1;
+	output [7:0]number;
+	wire clear;
+	wire clc;
+	wire enable;
+	wire [7:0]Q;
+	assign clear = SW[0];
+	assign enable = SW[1];
+	assign clc = KEY0;
+	wire [6:0]h1;
+	wire [6:0]h2;
+	counter counter8bit(enable,clc,clear,Q[0],Q[1],Q[2],Q[3],Q[4],Q[5],Q[6],Q[7]);
+	assign number[7:0] = Q[7:0];
+	driver driver1(Q[3:0],h1);
+	driver driver2(Q[7:4],h2);
+	assign HEX0[0] = h1[6];
+	assign HEX0[1] = h1[5];
+	assign HEX0[2] = h1[4];
+	assign HEX0[3] = h1[3];
+	assign HEX0[4] = h1[2];
+	assign HEX0[5] = h1[1];
+	assign HEX0[6] = h1[0];
+	assign HEX1[0] = h2[6];
+	assign HEX1[1] = h2[5];
+	assign HEX1[2] = h2[4];
+	assign HEX1[3] = h2[3];
+	assign HEX1[4] = h2[2];
+	assign HEX1[5] = h2[1];
+	assign HEX1[6] = h2[0];
+endmodule
+
+
+module counter(enable,clc,clear,Q1,Q2,Q3,Q4,Q5,Q6,Q7,Q8);
+	// Instantiate 8 t-flip-flops
+	input enable;
+	input clc;
+	input clear;
+	output Q1,Q2,Q3,Q4,Q5,Q6,Q7,Q8;
+	wire A1, A2, A3, A4, A5, A6, A7;
+	
+	tflipflop tff1(enable,clc,clear,Q1);
+	assign A1 = enable&Q1;
+	tflipflop tff2(A1,clc,clear,Q2);
+	assign A2 = A1&Q2;
+	tflipflop tff3(A2,clc,clear,Q3);
+	assign A3 = A2&Q3;
+	tflipflop tff4(A3,clc,clear,Q4);
+	assign A4 = A3&Q4;
+	tflipflop tff5(A4,clc,clear,Q5);
+	assign A5 = A4&Q5;
+	tflipflop tff6(A5,clc,clear,Q6);
+	assign A6 = A5&Q6;
+	tflipflop tff7(A6,clc,clear,Q7);
+	assign A7 = A6&Q7;
+	tflipflop tff8(A7,clc,clear,Q8);
+endmodule
+
+
+
+module driver(x,z);
+	input [3:0]x;
+	output reg [6:0]z;
+	always @*
+		case (x)
+4'b0000 :      	//Hexadecimal 0
+z = 7'b1111110;
+4'b0001 :    		//Hexadecimal 1
+z = 7'b0110000  ;
+4'b0010 :  		// Hexadecimal 2
+z = 7'b1101101 ; 
+4'b0011 : 		// Hexadecimal 3
+z = 7'b1111001 ;
+4'b0100 :		// Hexadecimal 4
+z = 7'b0110011 ;
+4'b0101 :		// Hexadecimal 5
+z = 7'b1011011 ;  
+4'b0110 :		// Hexadecimal 6
+z = 7'b1011111 ;
+4'b0111 :		// Hexadecimal 7
+z = 7'b1110000;
+4'b1000 :     		 //Hexadecimal 8
+z = 7'b1111111;
+4'b1001 :    		//Hexadecimal 9
+z = 7'b1111011 ;
+4'b1010 :  		// Hexadecimal A
+z = 7'b1110111 ; 
+4'b1011 : 		// Hexadecimal B
+z = 7'b0011111;
+4'b1100 :		// Hexadecimal C
+z = 7'b1001110 ;
+4'b1101 :		// Hexadecimal D
+z = 7'b0111101 ;
+4'b1110 :		// Hexadecimal E
+z = 7'b1001111 ;
+4'b1111 :		// Hexadecimal F
+z = 7'b1000111 ;
+endcase
+
+endmodule
+
+
+module tflipflop (
+data  , // Data Input
+clk   , // Clock Input
+reset , // Reset input
+q       // Q output
+);
+//-----------Input Ports---------------
+input data, clk, reset ; 
+//-----------Output Ports---------------
+output q;
+//------------Internal Variables--------
+reg q;
+//-------------Code Starts Here---------
+always @ ( posedge clk or negedge reset)
+if (~reset) begin
+  q <= 1'b0;
+end else if (data) begin
+  q <= !q;
+end
+endmodule //End Of Module tff_async_reset

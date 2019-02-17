@@ -1,0 +1,101 @@
+/*Program that counts consecutive 1s and 0s*/
+
+		  .text
+		  .global _start
+
+_start:
+		  LDR	SP, = 0x20000
+		  LDR	R4, = TESTNUM 
+		  MOV	R5, #0
+		  MOV	R6, #0
+		  MOV	R7, #0
+
+MAIN:	  	  LDR 	R1,[R4],#4
+		  CMP	R1,#0 		
+		  BEQ	END
+		  
+		  BL	ONES		
+		  CMP	R5,R0
+		  MOVLT	R5,R0
+		  
+		  BL	ZEROS		
+		  CMP	R6,R0
+		  MOVLT	R6,R0
+		  
+		  BL	ALTERNATE	
+		  CMP	R7,R0
+		  MOVLT	R7,R0
+		  
+		  B		MAIN
+		  
+END:	  	  B		END
+
+ONES:	  
+		  PUSH {R1}
+		  mov R0,#0
+		  
+O_LOOP:	  
+		  CMP	R1, #0
+		  BEQ	E_ONES
+		  LSR	R2, R1, #1
+		  AND	R1,R1,R2
+		  ADD	R0, #1
+		  B		O_LOOP
+		  
+E_ONES:	  
+		  POP {R1}
+		  mov	PC, LR
+
+ZEROS:
+		  PUSH {R1}	
+		  mov R0,#0
+		  MVN R1,R1
+Z_LOOP:
+		  CMP	R1, #0
+		  BEQ	E_ZEROS
+		  LSR	R2, R1, #1
+		  AND	R1,R1,R2
+		  ADD	R0, #1
+		  B		Z_LOOP
+		  
+E_ZEROS:
+		  POP {R1}
+		  mov	PC,LR
+
+ALTERNATE:
+		  PUSH {R1}	
+		  MOV R0,#0
+		  LDR R8, = 0xAAAAAAAA
+		  EOR R1,R1,R8
+
+A_ONES:	  	  CMP	R1, #0
+		  BEQ	A_RESET
+		  LSR	R2, R1, #1
+		  AND	R1,R1,R2
+		  ADD	R0, #1
+		  B		A_ONES
+
+A_RESET:
+		  POP {R1}
+		  PUSH {R1}
+		  EOR R1,R1,R8
+		  MVN R1,R1
+		  MOV R9,#0
+		
+A_ZEROS:  	  CMP	R1, #0
+		  BEQ	E_ALTERNATE
+		  LSR	R2, R1, #1
+		  AND	R1,R1,R2
+		  ADD	R9, #1
+		  B		A_ZEROS
+		  
+E_ALTERNATE:
+		  CMP R0,R9
+		  MOVLT R0,R9
+		  POP {R1}
+		  mov	PC,LR
+
+TESTNUM: .word	  0x103fe00f
+		 .word  0x0
+		 .end
+		 

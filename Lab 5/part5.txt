@@ -1,0 +1,101 @@
+module part5(HEX0,CLOCK_50);
+	output [0:6]HEX0;
+	input CLOCK_50;
+	wire enable1,enable2,r1,r2;
+	wire [25:0]Q1;
+	wire [3:0]Q2;
+	assign enable1 = 1'b1;
+	 
+	up_counter1 counter1(Q1,enable1,CLOCK_50,r1);
+	reset1 reset_1(Q1,r1);
+	assign enable2 = ~|(Q1);
+	up_counter2 counter2(Q2,enable2,CLOCK_50,r2);
+	reset2 reset_2(Q2,r2);
+	decoder decoder_7_seg(Q2,HEX0);
+endmodule
+
+module decoder (C, H);
+	input [3:0] C;
+	output [0:6] H;
+	wire [3:0] in0;
+	assign in0[3:0] = C[3:0];
+	assign H[0] = ((~in0[3])&(~in0[2])&(~in0[1])&in0[0]) | ((~in0[3])&in0[2]&(~in0[0]));
+	assign H[1] = ((~in0[3])&in0[2]&(~in0[1])&in0[0]) | ((~in0[3])&in0[2]&in0[1]&(~in0[0]));
+	assign H[2] = ((~in0[3])&(~in0[2])&in0[1]&(~in0[0]));
+	assign H[3] = ((~in0[1])&(in0[0])&(~in0[2])) | ((~in0[3])&in0[2]&in0[1]&in0[0]) | ((~in0[3])&in0[2]&(~in0[1])&(~in0[0]));
+	assign H[4] = ((~in0[3])&(in0[0])) | ((in0[3])&(~in0[2])&(~in0[1])&in0[0]) | ((~in0[3])&in0[2]&(~in0[1])&(~in0[0]));
+	assign H[5] = ((~in0[3])&(in0[0])&in0[1]) | ((~in0[3])&(~in0[2])&(in0[1])&(~in0[0])) | ((~in0[3])&(~in0[2])&(~in0[1])&(in0[0]));
+	assign H[6] = ((~in0[3])&(~in0[2])&(~in0[1])) | ((~in0[3])&in0[2]&in0[1]&in0[0]);
+endmodule
+
+module up_counter1   (
+q     ,  // Output of the counter
+enable  ,  // enable for counter
+clk     ,  // clock Input
+reset      // reset Input
+);
+//----------Output Ports--------------
+    output [25:0] q;
+	 reg [25:0]Q;
+//------------Input Ports--------------
+     input enable, clk, reset;
+	  
+//-------------Code Starts Here-------
+always @(posedge clk)
+if (~reset) begin
+  Q <= 26'b00000000000000000000000000;
+end else if (enable) begin
+  Q <= Q + 1;
+end
+assign q = Q;
+endmodule
+
+module up_counter2   (
+q     ,  // Output of the counter
+enable  ,  // enable for counter
+clk     ,  // clock Input
+reset      // reset Input
+);
+//----------Output Ports--------------
+    output [3:0] q;
+	 reg [3:0]Q;
+//------------Input Ports--------------
+     input enable, clk, reset;
+	  
+//-------------Code Starts Here-------
+always @(posedge clk)
+if (~reset) begin
+  Q <= 4'b0000 ;
+end else if (enable) begin
+  Q <= Q + 1;
+end
+assign q = Q;
+endmodule
+
+module reset1(Q,reset);
+	input [25:0]Q;
+	output reset;
+	reg R;
+	always @*
+	if (Q == 26'b10111110101111000010000000) begin
+		R <= 0;
+	end 
+	else begin
+		R <= 1;
+	end
+	assign reset = R;
+endmodule
+
+module reset2(Q,reset);
+	input [3:0]Q;
+	output reset;
+	reg R;
+	always @*
+	if (Q == 4'b1001) begin
+		R <= 0;
+	end 
+	else begin
+		R <= 1;
+	end
+	assign reset = R;
+endmodule

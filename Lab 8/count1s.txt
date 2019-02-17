@@ -1,0 +1,35 @@
+
+
+		  .text
+		  .global _start
+
+_start:
+		  LDR	R4, = TESTNUM 
+		  MOV	R5, #0
+
+MAIN:	  	  LDR 	R1,[R4],#4
+		  CMP	R1,#0
+		  BEQ	END
+		  BL	ONES
+		  CMP	R5,R0
+		  movLT	R5,R0
+		  B	MAIN
+		  
+
+
+END:		  B	END
+
+ONES:	  	  mov 	R0,#0 
+		  
+LOOP:	  	  CMP	R1, #0
+		  BEQ	E_ONES
+		  LSR	R2, R1, #1
+		  AND	R1,R1,R2
+		  ADD	R0, #1
+		  B	LOOP
+		  
+E_ONES:	  	  mov	PC, LR
+
+TESTNUM: 	  .word	7, 4, 6, 9, 0x103fe00f, 5, 9, 1001, 69, 18, 23
+		 
+		  .end

@@ -1,0 +1,50 @@
+module part1(D,clk,Qa,Qb,Qc,notQa,notQb,notQc);
+	input D;
+	input clk;
+	output Qa;
+	output Qb;
+	output Qc;
+	output notQa;
+	output notQb;
+	output notQc;
+	d_latch latch(D,clk,Qa,notQa);
+	positive positive1(D,clk,Qb,notQb);
+	negative negative1(D,clk,Qc,notQc);
+endmodule
+
+module d_latch (D,clk,Q,notQ);
+	input D, clk;
+	output reg Q;
+	output notQ;
+	always @ (D or clk)
+	if(clk)
+	begin
+		Q <= D;
+	end
+	assign notQ = ~Q;
+endmodule 
+
+
+module positive(D,clk,Q,notQ);
+	input D; // Data input 
+	input clk; // clock input 
+	output reg Q; // output Q 
+	output notQ;
+	always @(posedge clk) 
+	begin
+		Q <= D; 
+	end 
+	assign notQ = ~Q;
+endmodule
+
+module negative(D,clk,Q,notQ);
+	input D; // Data input 
+	input clk; // clock input 
+	output reg Q; // output Q 
+	output notQ;
+	always @(negedge clk) 
+	begin
+		Q <= D;
+	end 
+	assign notQ = ~Q;
+endmodule

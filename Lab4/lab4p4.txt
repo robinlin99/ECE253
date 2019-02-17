@@ -1,0 +1,127 @@
+
+module lab4p4(SW, HEX0, HEX1, HEX3, HEX5,LEDR);
+	input [9:0] SW;
+	output [0:6] HEX0;
+	output [0:6] HEX1;
+	output [0:6] HEX3;
+	output [0:6] HEX5;
+	output [9:0] LEDR;
+	wire [3:0]X;
+	wire [3:0]Y;
+	wire carryin;
+	wire [4:0]sum;
+	assign X[3:0] = SW[7:4];
+	assign Y[3:0] = SW[3:0];
+	assign carryin = SW[8];
+	wire xout;
+	wire yout;
+	wire error;
+	//ERROR CHECK FOR X AND Y
+	// NEED TO USE COMPARATOR
+	comparator xcheck(X,xout);
+	comparator ycheck(Y,yout);
+	
+	assign error = xout | yout;
+	assign LEDR[9] = error;
+	
+	ripple_adder(X,Y,carryin,sum,LEDR[4:0]);
+	decoderbottom inputdecoderX(X,HEX5);
+	decoderbottom inputdecoderY(Y,HEX3);
+	
+	
+	//S1S0 ON HEX1 AND HEX0
+	wire comparator_out;
+	wire [3:0]muxout;
+	wire [3:0]AOUT;
+	
+	comparator comp(sum,comparator_out);
+	circuitA cA(sum,AOUT);
+	mux mux1(comparator_out,sum[3:0],AOUT,muxout);
+	
+	decodertop d1(comparator_out,HEX1);
+	decoderbottom d0(muxout,HEX0);
+	
+endmodule
+
+module circuitA(V, A);
+	input [4:0] V;
+	output [3:0] A;
+	assign A[3] = V[4]&V[1];
+	assign A[2] = (V[4]&(~V[3])&(~V[2])&(~V[1])) | ((~V[4])&(V[3])&(V[2])&(V[1]));
+	assign A[1] = (V[4]&(~V[3])&(~V[2])&(~V[1])) | ((~V[4])&(V[3])&(V[2])&(~V[1]));
+	assign A[0] = ((~V[4])&(V[3])&(~V[2])&(V[1])&V[0]) | ((V[4])&(~V[3])&(~V[2])&(V[0]))|((~V[4])&(V[3])&(V[2])&(V[0]));
+endmodule
+
+module mux(s,a,b,o);
+	input s;
+	input [3:0] a;
+	input [3:0] b;
+	output [3:0] o;
+	assign o[0] = (~s&a[0])|(s&b[0]);
+	assign o[1] = (~s&a[1])|(s&b[1]);
+	assign o[2] = (~s&a[2])|(s&b[2]);
+	assign o[3] = (~s&a[3])|(s&b[3]);
+endmodule
+	
+module comparator(V,out);
+	input [4:0] V;
+	output out;
+	assign out = (V[4]&(~V[3])&(~V[2]))|((~V[4])&V[3]&V[2])|((~V[4])&V[3]&(~V[2])&V[1]);
+endmodule
+
+module decoderbottom (C, H);
+	input [9:0] C;
+	output [0:6] H;
+	wire [3:0] in0;
+	assign in0[3:0] = C[3:0];
+	assign H[0] = ((~in0[3])&(~in0[2])&(~in0[1])&in0[0]) | ((~in0[3])&in0[2]&(~in0[0]));
+	assign H[1] = ((~in0[3])&in0[2]&(~in0[1])&in0[0]) | ((~in0[3])&in0[2]&in0[1]&(~in0[0]));
+	assign H[2] = ((~in0[3])&(~in0[2])&in0[1]&(~in0[0]));
+	assign H[3] = ((~in0[1])&(in0[0])&(~in0[2])) | ((~in0[3])&in0[2]&in0[1]&in0[0]) | ((~in0[3])&in0[2]&(~in0[1])&(~in0[0]));
+	assign H[4] = ((~in0[3])&(in0[0])) | ((in0[3])&(~in0[2])&(~in0[1])&in0[0]) | ((~in0[3])&in0[2]&(~in0[1])&(~in0[0]));
+	assign H[5] = ((~in0[3])&(in0[0])&in0[1]) | ((~in0[3])&(~in0[2])&(in0[1])&(~in0[0])) | ((~in0[3])&(~in0[2])&(~in0[1])&(in0[0]));
+	assign H[6] = ((~in0[3])&(~in0[2])&(~in0[1])) | ((~in0[3])&in0[2]&in0[1]&in0[0]);
+endmodule
+
+module decodertop(c,h);
+	input c;
+	output [0:6] h;
+	assign h[0] = c;
+	assign h[1] = 1'b0;
+	assign h[2] = 1'b0;
+	assign h[3] = c;
+	assign h[4] = c;
+	assign h[5] = c;
+	assign h[6] = 1'b1;
+endmodule
+
+module ripple_adder(B,A,cin,sum,L);
+	input [3:0]B;
+	input [3:0]A;
+	input cin;
+	output [4:0]sum;
+	output [4:0]L;
+	
+	wire c1;
+	wire c2;
+	wire c3;
+	wire cout;
+	wire [3:0]S;
+	
+	fa fa0(B[0],A[0],cin,c1,S[0]);
+	fa fa1(B[1],A[1],c1,c2,S[1]);
+	fa fa2(B[2],A[2],c2,c3,S[2]);
+	fa fa3(B[3],A[3],c3,cout,S[3]);
+	
+	assign sum[3:0] = S[3:0];
+	assign sum[4] = cout;
+	assign L[3:0] = S[3:0];
+	assign L[4] = cout;
+endmodule
+
+module fa(b,a,ci,co,s);
+	input b,a,ci;
+	output co,s;
+	assign co = b&a | (~b)&a&ci | b&(~a)&ci;
+	assign s = ((~b)&(~a)&ci) | ((~b)&a&(~ci)) | (b&(~a)&(~ci)) | (b&a&ci);
+endmodule

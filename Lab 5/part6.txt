@@ -1,0 +1,123 @@
+module part6(HEX0,HEX1,HEX2,HEX3,HEX4,HEX5,CLOCK_50);
+	output [0:6]HEX0;
+	output [0:6]HEX1;
+	output [0:6]HEX2;
+	output [0:6]HEX3;
+	output [0:6]HEX4;
+	output [0:6]HEX5;
+	
+	input CLOCK_50;
+	wire enable1,enable2,r1,r2;
+	wire [25:0]Q1;
+	wire [3:0]Q2;
+	assign enable1 = 1'b1;
+	 
+	up_counter1 counter1(Q1,enable1,CLOCK_50,r1);
+	reset1 reset_1(Q1,r1);
+	assign enable2 = ~|(Q1);
+	up_counter2 counter2(Q2,enable2,CLOCK_50,r2);
+	reset2 reset_2(Q2,r2);
+	wire [6:0]blank;
+	wire [6:0]one;
+	wire [6:0]d;
+	wire [6:0]E;
+	wire [2:0]sel;
+	assign blank = 7'b1111111;
+	assign one = 7'b1001111;
+	assign d = 7'b1000010;
+	assign E = 7'b0110000;
+	assign sel[2:0] = Q2[2:0];
+	mux mux0(one,blank,blank,blank,d,E,sel,HEX0);         
+	mux mux1(E,one,blank,blank,blank,d,sel,HEX1);
+	mux mux2(d,E,one,blank,blank,blank,sel,HEX2);
+	mux mux3(blank,d,E,one,blank,blank,sel,HEX3);
+	mux mux4(blank,blank,d,E,one,blank,sel,HEX4);
+	mux mux5(blank,blank,blank,d,E,one,sel,HEX5);
+endmodule
+
+module mux (input[6:0]a,input[6:0]b,input[6:0]c,input[6:0]d,input[6:0]e,input[6:0]f,input[2:0]sel,output [6:0]outhex);         
+	reg [6:0]out;
+   always @ (a or b or c or d or e or f or sel) begin
+      case (sel)
+         3'b000 : out <= a;
+         3'b001 : out <= b;
+         3'b010 : out <= c;
+         3'b011 : out <= d;
+			3'b100 : out <= e;
+         3'b001 : out <= f;
+      endcase
+   end
+	assign outhex = out;
+endmodule
+
+module up_counter1   (
+q     ,  // Output of the counter
+enable  ,  // enable for counter
+clk     ,  // clock Input
+reset      // reset Input
+);
+//----------Output Ports--------------
+    output [25:0] q;
+	 reg [25:0]Q;
+//------------Input Ports--------------
+     input enable, clk, reset;
+	  
+//-------------Code Starts Here-------
+always @(posedge clk)
+if (~reset) begin
+  Q <= 26'b00000000000000000000000000;
+end else if (enable) begin
+  Q <= Q + 1;
+end
+assign q = Q;
+endmodule
+
+module up_counter2   (
+q     ,  // Output of the counter
+enable  ,  // enable for counter
+clk     ,  // clock Input
+reset      // reset Input
+);
+//----------Output Ports--------------
+    output [3:0] q;
+	 reg [3:0]Q;
+//------------Input Ports--------------
+     input enable, clk, reset;
+	  
+//-------------Code Starts Here-------
+always @(posedge clk)
+if (~reset) begin
+  Q <= 4'b0000 ;
+end else if (enable) begin
+  Q <= Q + 1;
+end
+assign q = Q;
+endmodule
+
+module reset1(Q,reset);
+	input [25:0]Q;
+	output reset;
+	reg R;
+	always @*
+	if (Q == 26'b10111110101111000010000000) begin
+		R <= 0;
+	end 
+	else begin
+		R <= 1;
+	end
+	assign reset = R;
+endmodule
+
+module reset2(Q,reset);
+	input [3:0]Q;
+	output reset;
+	reg R;
+	always @*
+	if (Q == 4'b0101) begin
+		R <= 0;
+	end 
+	else begin
+		R <= 1;
+	end
+	assign reset = R;
+endmodule

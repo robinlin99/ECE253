@@ -1,0 +1,35 @@
+module lab4p3(SW,LEDR);
+	input [9:0] SW;
+	output [9:0] LEDR;
+	wire [3:0]A;
+	wire [3:0]B;
+	wire cin;
+	wire c1;
+	wire c2;
+	wire c3;
+	wire cout;
+	wire [3:0]S;
+	
+	assign A[3:0] = SW[7:4];
+	assign B[3:0] = SW[3:0];
+	assign cin = SW[8];
+	
+	fa fa0(B[0],A[0],cin,c1,S[0]);
+	fa fa1(B[1],A[1],c1,c2,S[1]);
+	fa fa2(B[2],A[2],c2,c3,S[2]);
+	fa fa3(B[3],A[3],c3,cout,S[3]);
+	
+	
+	// Connect S to LEDR[3:0]
+	assign LEDR[3:0] = S[3:0];
+	// Assign cout to LEDR[4]
+	assign LEDR[4] = cout;	
+endmodule
+
+
+module fa(b,a,ci,co,s);
+	input b,a,ci;
+	output co,s;
+	assign co = b&a | (~b)&a&ci | b&(~a)&ci;
+	assign s = ((~b)&(~a)&ci) | ((~b)&a&(~ci)) | (b&(~a)&(~ci)) | (b&a&ci);
+endmodule

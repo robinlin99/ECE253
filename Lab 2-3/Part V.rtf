@@ -1,0 +1,90 @@
+{\rtf1\ansi\ansicpg1252\cocoartf1671
+{\fonttbl\f0\froman\fcharset0 Times-Roman;}
+{\colortbl;\red255\green255\blue255;\red0\green0\blue0;}
+{\*\expandedcolortbl;;\cssrgb\c0\c0\c0;}
+\margl1440\margr1440\vieww20520\viewh13680\viewkind0
+\deftab720
+\pard\pardeftab720\sl280\partightenfactor0
+
+\f0\fs26 \cf2 \expnd0\expndtw0\kerning0
+module part5 (SW, LEDR, HEX0, HEX1, HEX2, HEX3, HEX4, HEX5);\
+	input [9:0] SW;\
+	output [9:0] LEDR;\
+	output [0:6] HEX0;\
+	output [0:6] HEX1;\
+	output [0:6] HEX2;\
+	\cf2 output [0:6] HEX3;\
+\cf2 	\cf2 output [0:6] HEX4;\
+\cf2 	\cf2 output [0:6] HEX5;\cf2 \
+	wire [1:0] M0;\
+	wire [1:0] M1;\
+	wire [1:0] M2;\
+	\cf2 wire [1:0] M3;\
+	wire [1:0] M4;\
+	wire [1:0] M5;\
+	wire [1:0] blank;\
+	assign blank[0] = 1\'92b1;\
+	assign blank[1] = 1\'92b1;\cf2 \
+	
+\fs24 \cf2 mux_2bit_6to1 U0 (SW[9:7], blank, blank, blank, SW[5:4], SW[3:2], SW[1:0],  M0); \
+	mux_2bit_6to1 U1 (SW[9:7], blank, blank, SW[5:4], SW[3:2], SW[1:0], blank,  M1);\
+	mux_2bit_6to1 U2 (SW[9:7], blank, SW[5:4], SW[3:2], SW[1:0], blank, blank,  M2);\
+\cf2 	\cf2 mux_2bit_6to1 U3 (SW[9:7], SW[5:4], SW[3:2], SW[1:0], blank, blank, blank, M3); \
+	mux_2bit_6to1 U4 (SW[9:7], SW[3:2], SW[1:0], blank, blank, blank, SW[5:4], M4);\
+	mux_2bit_6to1 U5 (SW[9:7], SW[1:0], blank, blank, blank, SW[5:4], SW[3:2], M5);\
+\cf2 \
+	char_7seg H0 (M0, HEX0); \
+	char_7seg H1 (M1, HEX1); \
+	char_7seg H2 (M2, HEX2); \
+	\cf2 char_7seg H3 (M3, HEX3); \
+	char_7seg H4 (M4, HEX4); \
+	char_7seg H5 (M5, HEX5); \cf2 \
+ endmodule \
+\
+\
+module mux_2bit_6to1 (S, U, V, W, X, Y, Z, M);\
+	input [1:0] U, V, W, X, Y, Z\
+	input [2:0] S;\
+	output [1:0] M; \
+	wire s0;\
+\pard\pardeftab720\partightenfactor0
+\cf2 	wire s1;\
+	wire s2;\
+	wire [1:0] intermediate;\
+	wire [1:0] intermediate1;\
+	wire [1:0] intermediate2;\
+	wire [1:0] intermediate3;\
+	assign s0 = S[0];\
+	assign s1 = S[1];\
+	assign s2 = S[2];\
+	assign intermediate[0] = (~s0 & U[0]) | (s0 & V[0]);\
+	assign intermediate[1] = (~s0 & U[1]) | (s0 & V[1]);\
+	\cf2 assign intermediate1[0] = (~s0 & W[0]) | (s0 & X[0]);\
+	assign intermediate1[1] = (~s0 & W[1]) | (s0 & X[1]);\
+	assign intermediate2[0] = (~s0 & Y[0]) | (s0 & Z[0]);\
+	assign intermediate2[1] = (~s0 & Y[1]) | (s0 & Z[1]);\
+	assign intermediate3[0] = (~s1 & intermediate[0]) | (s1 & intermediate1[0]);\
+	assign intermediate3[1] = (~s1 & intermediate[1]) | (s1 & intermediate1[1]);\cf2 \
+	assign M[0] = (~s2 & intermediate3[0]) | (s2 & intermediate2[0]);\
+	assign M[1] = (~s2 & intermediate3[1]) | (s2 & intermediate2[1]);\
+\pard\pardeftab720\sl280\partightenfactor0
+\cf2 end module \
+\
+// implements a 7-segment decoder for d, E, 1 and \'91blank\'92 \
+module char_7seg (C, Display); \
+	input [1:0] C; \
+	output [0:6] Display; \
+	wire c1;\
+	wire c0;\
+	assign c0 = C[0];	\
+	assign c1 = C[1];\
+\pard\pardeftab720\partightenfactor0
+\cf2 	assign Display[0] = c1 | ~c0;\
+	assign Display[1] = c0;\
+	assign Display[2] = c0;\
+	assign Display[3] = c1;\
+	assign Display[4] = c1;\
+	assign Display[5] = c1|~c0;\
+	assign Display[6] = c1;\
+\pard\pardeftab720\sl280\partightenfactor0
+\cf2 end module}

@@ -1,0 +1,68 @@
+
+module lab4p2(SW, HEX0, HEX1);
+	input [3:0] SW;
+	output [0:6] HEX0;
+	output [0:6] HEX1;
+	wire cout;
+	wire [3:0] AOUT;
+	wire [3:0] muxout;
+	comparator COM1(SW[3:0],cout);
+	circuitA CA(SW[3:0],AOUT);
+	mux MUX1(cout,SW[3:0],AOUT[3:0],muxout);
+	decodertop top(cout,HEX1);
+	decoderbottom bottom(muxout,HEX0);
+endmodule
+
+module circuitA(V, A);
+	input [3:0] V;
+	output [3:0] A;
+	assign A[3] = 1'b0;
+	assign A[2] = (V[3]&V[2]&V[1]);
+	assign A[1] = V[3]&V[2]&(~V[1]);
+	assign A[0] = (V[3]&(V[2])&(~V[1])&V[0])|(V[1]&V[3]&V[0]);
+endmodule
+
+module mux(s,a,b,o);
+	input s;
+	input [3:0] a;
+	input [3:0] b;
+	output [3:0] o;
+	assign o[0] = (~s&a[0])|(s&b[0]);
+	assign o[1] = (~s&a[1])|(s&b[1]);
+	assign o[2] = (~s&a[2])|(s&b[2]);
+	assign o[3] = (~s&a[3])|(s&b[3]);
+endmodule
+	
+module comparator(V,out);
+	input [3:0] V;
+	output out;
+	assign out = V[3]&V[2] | (V[3]&(~V[2])&V[1]);
+endmodule
+
+module decoderbottom (C, H);
+	input [9:0] C;
+	output [0:6] H;
+	wire [3:0] in0;
+	assign in0[3:0] = C[3:0];
+	assign H[0] = ((~in0[3])&(~in0[2])&(~in0[1])&in0[0]) | ((~in0[3])&in0[2]&(~in0[0]));
+	assign H[1] = ((~in0[3])&in0[2]&(~in0[1])&in0[0]) | ((~in0[3])&in0[2]&in0[1]&(~in0[0]));
+	assign H[2] = ((~in0[3])&(~in0[2])&in0[1]&(~in0[0]));
+	assign H[3] = ((~in0[1])&(in0[0])&(~in0[2])) | ((~in0[3])&in0[2]&in0[1]&in0[0]) | ((~in0[3])&in0[2]&(~in0[1])&(~in0[0]));
+	assign H[4] = ((~in0[3])&(in0[0])) | ((in0[3])&(~in0[2])&(~in0[1])&in0[0]) | ((~in0[3])&in0[2]&(~in0[1])&(~in0[0]));
+	assign H[5] = ((~in0[3])&(in0[0])&in0[1]) | ((~in0[3])&(~in0[2])&(in0[1])&(~in0[0])) | ((~in0[3])&(~in0[2])&(~in0[1])&(in0[0]));
+	assign H[6] = ((~in0[3])&(~in0[2])&(~in0[1])) | ((~in0[3])&in0[2]&in0[1]&in0[0]);
+endmodule
+
+module decodertop(c,h);
+	input c;
+	output [0:6] h;
+	assign h[0] = c;
+	assign h[1] = 1'b0;
+	assign h[2] = 1'b0;
+	assign h[3] = c;
+	assign h[4] = c;
+	assign h[5] = c;
+	assign h[6] = 1'b1;
+endmodule
+	
+
